@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ellie Date Invite</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Pacifico&family=Playfair+Display&family=Rouge+Script&display=swap');
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: 'Rouge Script', cursive;
+      color: white;
+    }
+
+    .button {
+      position: absolute;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      max-width: calc(100% - 40px);
+      max-height: calc(100% - 40px);
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    #startButton {
+      background: linear-gradient(to right, turquoise, coral);
+    }
+
+    .fireworks {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .firework {
+      position: absolute;
+      width: 2px;
+      height: 40px;
+      background: white;
+      transform-origin: center bottom;
+      animation: explode 1s ease-out forwards;
+    }
+
+    @keyframes explode {
+      0% {
+        transform: scaleY(0.1) translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: scaleY(1) translate(var(--x), var(--y));
+        opacity: 0;
+      }
+    }
+
+    #finalMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      text-align: center;
+      display: none;
+      z-index: 2;
+      animation: neonPulse 1s infinite alternate;
+      font-family: 'Pacifico', cursive;
+    }
+
+    @keyframes neonPulse {
+      from {
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 20px #ffff00;
+      }
+      to {
+        text-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff, 0 0 30px #ffff00;
+      }
+    }
+
+    #choices {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    #choices button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+
+    #wrongMsg, #correctMsg {
+      display: none;
+      text-align: center;
+      font-size: 2rem;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Playfair Display', serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="fireworks" id="fireworks"></div>
+  <button id="startButton" class="button">Press me</button>
+  <div id="finalMessage"></div>
+
+  <div id="choices">
+    <button style="background:white;color:black" id="wrongBtn">❌ You sure? 🥺</button>
+    <button style="background:orange;color:black" id="correctBtn">🥰 Yes please! 🍊</button>
+  </div>
+
+  <div id="wrongMsg">You picked wrong, only way to claim the date back is to kiss your girlfriend and tell her how much you love her and it’s all fine 🍊🧡</div>
+  <div id="correctMsg">Good choice my ickle raisin, you just won a date with the most amazing girlfriend in the world 🤍</div>
+
+  <script>
+    const body = document.body;
+    let clickCount = 0;
+    let usedCombos = new Set();
+
+    const colorOptions = [
+      ['red', 'blue'], ['green', 'pink'], ['purple', 'cyan'],
+      ['lime', 'violet'], ['teal', 'magenta'], ['gold', 'navy'], ['maroon', 'aqua']
+    ];
+
+    function createButton(text, color1, color2, size, posX, posY, onClick) {
+      const btn = document.createElement('button');
+      btn.className = 'button';
+      btn.textContent = text;
+      btn.style.background = `linear-gradient(to right, ${color1}, ${color2})`;
+      btn.style.fontSize = size;
+      btn.style.left = posX;
+      btn.style.top = posY;
+      btn.onclick = () => {
+        btn.remove();
+        onClick();
+      };
+      body.appendChild(btn);
+    }
+
+    function getRandomCombo() {
+      let available = colorOptions.filter(combo => !usedCombos.has(combo.toString()));
+      if (available.length === 0) usedCombos.clear();
+      available = colorOptions.filter(combo => !usedCombos.has(combo.toString()));
+      const combo = available[Math.floor(Math.random() * available.length)];
+      usedCombos.add(combo.toString());
+      return combo;
+    }
+
+    function getRandomSize() {
+      const sizes = ['1rem', '1.2rem', '1.5rem', '2rem'];
+      return sizes[Math.floor(Math.random() * sizes.length)];
+    }
+
+    function getSafePosition() {
+      return Math.floor(Math.random() * 80 + 10) + '%';
+    }
+
+    function launchFireworks(x, y) {
+      const fireworks = document.getElementById('fireworks');
+      fireworks.innerHTML = '';
+
+      for (let t = 0; t < 10; t++) {
+        setTimeout(() => {
+          for (let i = 0; i < 100; i++) {
+            const f = document.createElement('div');
+            f.className = 'firework';
+            const angle = (i / 100) * 2 * Math.PI;
+            const radius = Math.random() * 150 + 100;
+            f.style.left = `${x}px`;
+            f.style.top = `${y}px`;
+            f.style.background = `hsl(${Math.random() * 360}, 100%, 75%)`;
+            f.style.setProperty('--x', `${Math.cos(angle) * radius}px`);
+            f.style.setProperty('--y', `${Math.sin(angle) * radius}px`);
+            f.style.transform = `rotate(${angle}rad)`;
+            f.style.animationDelay = `${Math.random() * 0.3}s`;
+            fireworks.appendChild(f);
+          }
+        }, t * 1000);
+      }
+    }
+
+    function colorfulText(text) {
+      const colors = ['#ff69b4', '#ffd700', '#00ffff', '#00ced1', '#ff6347'];
+      return text.split('').map((letter, index) => {
+        const color = colors[index % colors.length];
+        return `<span style="color: ${color}; text-shadow: 0 0 10px ${color}; animation: neonPulse 1s infinite alternate;">${letter}</span>`;
+      }).join('');
+    }
+
+    document.getElementById('startButton').onclick = function () {
+      this.remove();
+      createButton('Oops, try again', 'forestgreen', 'navy', '1rem', '80%', '5%', () => {
+        const [c1, c2] = getRandomCombo();
+        createButton('Ha, got ya', c1, c2, '1.1rem', '10%', '60%', () => {
+          const [c3, c4] = getRandomCombo();
+          createButton('Almost there', c3, c4, getRandomSize(), getSafePosition(), getSafePosition(), () => {
+            createButton('Obicham te / I love you', 'orange', 'white', getRandomSize(), getSafePosition(), getSafePosition(), () => {
+              const spamBtn = document.createElement('button');
+              spamBtn.className = 'button';
+              spamBtn.textContent = 'Press me';
+              spamBtn.style.background = 'linear-gradient(to right, green, yellow)';
+              spamBtn.style.left = '50%';
+              spamBtn.style.top = '50%';
+              spamBtn.style.transform = 'translate(-50%, -50%)';
+
+              spamBtn.onclick = () => {
+                clickCount++;
+                if (clickCount === 5) spamBtn.textContent = 'Press me harder, honey';
+                if (clickCount >= 10) {
+                  spamBtn.remove();
+                  showFinal();
+                }
+              };
+              body.appendChild(spamBtn);
+            });
+          });
+        });
+      });
+    };
+
+    function showFinal() {
+      const final = document.getElementById('finalMessage');
+      final.innerHTML = colorfulText("Ellie, will you go on an online, movie, gaming, talking date with me today?");
+      final.style.display = 'block';
+      const fireworks = document.getElementById('fireworks');
+      fireworks.style.display = 'block';
+
+      const rect = final.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      launchFireworks(centerX, centerY);
+
+      setTimeout(() => {
+        final.style.display = 'none';
+        fireworks.style.display = 'none';
+        document.getElementById('choices').style.display = 'flex';
+      }, 10000);
+    }
+
+    document.getElementById('wrongBtn').onclick = () => {
+      document.getElementById('choices').style.display = 'none';
+      document.getElementById('wrongMsg').style.display = 'block';
+    };
+
+    document.getElementById('correctBtn').onclick = () => {
+      document.getElementById('choices').style.display = 'none';
+      document.getElementById('correctMsg').style.display = 'block';
+    };
+  </script>
+</body>
+</html>
